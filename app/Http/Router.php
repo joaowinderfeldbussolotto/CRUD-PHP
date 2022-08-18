@@ -4,6 +4,7 @@
     use \Closure;
     use \Exception;
     use \ReflectionFunction;
+    use \App\Http\Middleware\Queue as MiddlewareQueue;
 
     class Router{
         /*
@@ -62,6 +63,9 @@
                     continue;
                 }
             }
+
+
+            $params['middlewares']  = $params['middlewares'] ?? [];
 
             // VARIÁVEIS DA ROTA
             $params['variables'] = [];
@@ -168,10 +172,6 @@
                 //obtém a rota atual
                 $route = $this->getRoute();
 
-                //echo "<pre>";
-                //print_r($route);
-                //echo "</pre";
-
                 // Verfica o controlador
                 if(!isset($route['Controller'])){
                     throw new Exception("A URL não pode ser processada", 500);
@@ -186,9 +186,8 @@
                     $name = $parameter->getName();
                     $args[$name] = $route['variables'][$name] ?? '';
                 }
-
-                // Retorna a execução da função
-                return call_user_func_array($route['Controller'], $args);
+                // Retorna a execução da fila de middlewares
+                return (new MiddlewareQueue($route['middlewares'], $route['Controller'], $args))->next($this->request);
             }catch(Exception $e){
                 return new Response($e->getCode(), $e->getMessage());
             }
@@ -196,6 +195,12 @@
 
         public function getCurrentUrl(){
             return $this->url.$this->getUri();
+        }
+
+        public function redirect($route){
+            $URL = $this->url.$route;
+            header('location:'.$URL);
+            exit;
         }
 
     }

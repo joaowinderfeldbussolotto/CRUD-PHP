@@ -13,12 +13,12 @@
             return View::render('pages/templates/footer');
         }
 
-        public static function getPage($title, $content){
+        public static function getPage($title, $content,$header = null, $footer = null){
             return View::render('pages/page', [
                 'title' => $title,
-                'header' => self::getHeader(),
+                'header' => $header != null ? '': self::getHeader(),
                 'content' => $content,
-                'footer' => self::getFooter(),
+                'footer' => $footer != null ? '': self::getFooter(),
             ]);
         }
         public static function getPagination($request, $obPagination){

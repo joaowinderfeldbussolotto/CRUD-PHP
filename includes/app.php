@@ -1,10 +1,12 @@
 <?php
     define('ROOT', __DIR__.'/../');
     require __DIR__.'/../vendor/autoload.php';
-    
     use \app\Utils\View;
     use WilliamCosta\DotEnv\Environment;
     use \app\Db\Database;
+    use \app\Http\Middleware\Queue as MiddlewareQueue;
+
+
     Environment::load(__DIR__.'/../');
 
     define('URL', getenv('URL'));
@@ -15,4 +17,14 @@
     // Define o valor padrão das variáveis
     View::init([
         'URL' => URL
+    ]);
+
+    MiddlewareQueue::setMap([
+        'maintenance' => \app\Http\Middleware\Maintenance::class,
+        'required-admin-logout' => \app\Http\Middleware\RequireSessionLogout::class,
+        'required-admin-login' => \app\Http\Middleware\RequireSessionLogin::class
+    ]);
+
+    MiddlewareQueue::setDefault([
+        'maintenance'
     ]);
